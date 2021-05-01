@@ -1,0 +1,41 @@
+{
+	"info": {
+		"_postman_id": "22ed2e84-dcc1-46ce-8ae9-d1cbd3f0a79d",
+		"name": "ticketManager",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "calculatePrice",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"passengerList\":[\n\t\t\t{\"passengerType\":\"ADULT\",\n\t\t\"luggageUnits\": 2\n\t\t},\n\t\t\t{\"passengerType\":\"CHILD\",\n\t\t\"luggageUnits\": 1\n\t\t},\n\t\t\t{\"passengerType\":\"PENSIONER\",\n\t\t\"luggageUnits\": 1\n\t\t}\n\t],\n\t\"destination\": \"Munamegis\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/v1/ticket-manager",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"v1",
+						"ticket-manager"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
