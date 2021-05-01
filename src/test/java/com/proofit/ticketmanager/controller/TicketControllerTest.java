@@ -14,6 +14,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
+
 import static com.proofit.ticketmanager.service.util.Constants.VARIABLES_ARE_NULL_CHECK_CLIENT_RESPONSES;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -41,18 +44,18 @@ class TicketControllerTest {
     @Test
     void shouldReturnResponse() throws Exception {
         String requestBody = String.format(request, "ADULT", 1, "Liepaja");
-        when(facade.calculateOrderPrice(any(TicketRequest.class))).thenReturn(new TicketResponse());
+        when(facade.calculateOrderPrice(any(TicketRequest.class))).thenReturn(createTicketResponse());
         mockMvc.perform(post(URL_TEMPLATE)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody))
                 .andExpect(status().isOk())
-                .andExpect(content().string((mapper.writeValueAsString(new TicketResponse()))));
+                .andExpect(content().string((mapper.writeValueAsString(createTicketResponse()))));
     }
 
     @Test
     void shouldReturnResponse_ParsingError_WrongType() throws Exception {
         String requestBody = String.format(request, "UNKNOWN_TYPE", 1, "Liepaja");
-        when(facade.calculateOrderPrice(any(TicketRequest.class))).thenReturn(new TicketResponse());
+        when(facade.calculateOrderPrice(any(TicketRequest.class))).thenReturn(createTicketResponse());
         mockMvc.perform(post(URL_TEMPLATE)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody))
@@ -63,7 +66,7 @@ class TicketControllerTest {
     @Test
     void shouldReturnResponse_ParsingError_EmptyValue() throws Exception {
         String requestBody = String.format(request, "", 1, "Liepaja");
-        when(facade.calculateOrderPrice(any(TicketRequest.class))).thenReturn(new TicketResponse());
+        when(facade.calculateOrderPrice(any(TicketRequest.class))).thenReturn(createTicketResponse());
         mockMvc.perform(post(URL_TEMPLATE)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody))
@@ -75,7 +78,7 @@ class TicketControllerTest {
     void shouldReturnResponse_ValidationError_NoDestination() throws Exception {
         String requestA = "{\"passengerList\":[{\"passengerType\": \"%s\",\"luggageUnits\":%s}]}";
         String requestBody = String.format(requestA, "ADULT", 1);
-        when(facade.calculateOrderPrice(any(TicketRequest.class))).thenReturn(new TicketResponse());
+        when(facade.calculateOrderPrice(any(TicketRequest.class))).thenReturn(createTicketResponse());
         mockMvc.perform(post(URL_TEMPLATE)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody))
@@ -86,7 +89,7 @@ class TicketControllerTest {
     @Test
     void shouldReturnResponse_ValidationError_EmptyDestination() throws Exception {
         String requestBody = String.format(request, "ADULT", 1, "");
-        when(facade.calculateOrderPrice(any(TicketRequest.class))).thenReturn(new TicketResponse());
+        when(facade.calculateOrderPrice(any(TicketRequest.class))).thenReturn(createTicketResponse());
         mockMvc.perform(post(URL_TEMPLATE)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody))
@@ -97,7 +100,7 @@ class TicketControllerTest {
     @Test
     void shouldReturnResponse_ValidationError_NegativeLuggageValue() throws Exception {
         String requestBody = String.format(request, "ADULT", -2, "Tallin");
-        when(facade.calculateOrderPrice(any(TicketRequest.class))).thenReturn(new TicketResponse());
+        when(facade.calculateOrderPrice(any(TicketRequest.class))).thenReturn(createTicketResponse());
         mockMvc.perform(post(URL_TEMPLATE)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody))
@@ -115,5 +118,9 @@ class TicketControllerTest {
                 .content(requestBody))
                 .andExpect(status().is5xxServerError())
                 .andExpect(content().string(String.format(errorResponseMessage, VARIABLES_ARE_NULL_CHECK_CLIENT_RESPONSES)));
+    }
+
+    private TicketResponse createTicketResponse() {
+        return new TicketResponse(new ArrayList<>(), BigDecimal.valueOf(10));
     }
 }

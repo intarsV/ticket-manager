@@ -53,12 +53,10 @@ public class ServiceFacade {
     }
 
     private Ticket createTicket(final Passenger passenger, final BigDecimal basePrice, final BigDecimal tax) {
-        final Ticket ticket = new Ticket();
-        ticket.setPassenger(passenger);
-        ticket.setPassengerPrice(addTaxToPrice(calculatePassengerBasePrice(passenger, basePrice), tax));
-        ticket.setLuggagePrice(addTaxToPrice(calculateLuggagePrice(passenger, basePrice), tax));
-        ticket.setTotal(ticket.getPassengerPrice().add(ticket.getLuggagePrice()).setScale(2, RoundingMode.HALF_UP));
-        return ticket;
+        final BigDecimal passengerPrice = addTaxToPrice(calculatePassengerBasePrice(passenger, basePrice), tax);
+        final BigDecimal luggagePrice = addTaxToPrice(calculateLuggagePrice(passenger, basePrice), tax);
+        final BigDecimal total = passengerPrice.add(luggagePrice).setScale(2, RoundingMode.HALF_UP);
+        return new Ticket(passenger, passengerPrice, luggagePrice, total);
     }
 
     private BigDecimal calculatePassengerBasePrice(final Passenger passenger, final BigDecimal basePrice) {
@@ -86,10 +84,8 @@ public class ServiceFacade {
     }
 
     private TicketResponse createResponse(final List<Ticket> ticketList) {
-        final TicketResponse response = new TicketResponse();
-        response.setTicketList(ticketList);
-        response.setTotal(calculateTotalPrice(ticketList));
-        return response;
+        final BigDecimal total = calculateTotalPrice(ticketList);
+        return new TicketResponse(ticketList, total);
     }
 
     private BigDecimal calculateTotalPrice(final List<Ticket> list) {

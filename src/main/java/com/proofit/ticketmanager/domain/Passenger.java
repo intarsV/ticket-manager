@@ -1,29 +1,32 @@
 package com.proofit.ticketmanager.domain;
 
+import io.swagger.annotations.ApiModelProperty;
+
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 public class Passenger {
 
     @NotNull
-    private PassengerType passengerType;
+    @ApiModelProperty(value = "Passenger type", allowableValues = "ADULT, CHILD, PENSIONER")
+    private final PassengerType passengerType;
 
     @Min(value = 0, message = "Minimal luggage units should be zero!")
-    private int luggageUnits;
+    @ApiModelProperty(value = "Luggage units for passenger", example = "1")
+    private final int luggageUnits;
+
+    public Passenger(@NotNull PassengerType passengerType,
+                     @Min(value = 0, message = "Minimal luggage units should be zero!") int luggageUnits) {
+        this.passengerType = passengerType;
+        this.luggageUnits = luggageUnits;
+    }
 
     public PassengerType getPassengerType() {
         return passengerType;
-    }
-
-    public void setPassengerType(PassengerType passengerType) {
-        this.passengerType = passengerType;
     }
 
     public int getLuggageUnits() {
         return luggageUnits;
     }
 
-    public void setLuggageUnits(int luggageUnits) {
-        this.luggageUnits = luggageUnits;
-    }
 }

@@ -17,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.util.Collections;
+import java.util.List;
 
 import static com.proofit.ticketmanager.service.util.Constants.VARIABLES_ARE_NULL_CHECK_CLIENT_RESPONSES;
 import static org.junit.jupiter.api.Assertions.*;
@@ -35,8 +36,18 @@ class ServiceFacadeTest {
 
     @ParameterizedTest
     @CsvSource(value = {"ADULT:15.73", "CHILD:9.68", "PENSIONER:3.63"}, delimiter = ':')
-    void shouldCorrectlyCalculateForAdult(String passengerType, String expectedResult) {
-        TicketRequest request = createTicketRequest(passengerType);
+    void shouldCorrectlyCalculateForAdult_OneLuggageUnit(String passengerType, String expectedResult) {
+        TicketRequest request = createTicketRequest(passengerType, 1);
+        when(taxClient.getTax()).thenReturn(BigDecimal.valueOf(0.21));
+        when(basePriceClient.getBasePrice(anyString())).thenReturn(BigDecimal.valueOf(10));
+        TicketResponse r = facade.calculateOrderPrice(request);
+        assertEquals(new BigDecimal(expectedResult), r.getTotal());
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {"ADULT:12.10", "CHILD:6.05", "PENSIONER:0.00"}, delimiter = ':')
+    void shouldCorrectlyCalculateForAdult_NoLuggage(String passengerType, String expectedResult) {
+        TicketRequest request = createTicketRequest(passengerType, 0);
         when(taxClient.getTax()).thenReturn(BigDecimal.valueOf(0.21));
         when(basePriceClient.getBasePrice(anyString())).thenReturn(BigDecimal.valueOf(10));
         TicketResponse r = facade.calculateOrderPrice(request);
@@ -45,7 +56,7 @@ class ServiceFacadeTest {
 
     @Test
     void CalcVariablesAreNull_shouldThrowException() {
-        TicketRequest request = createTicketRequest("ADULT");
+        TicketRequest request = createTicketRequest("ADULT", 1);
         TicketManagerException thrown = assertThrows(
                 TicketManagerException.class,
                 () -> facade.calculateOrderPrice(request),
@@ -54,17 +65,13 @@ class ServiceFacadeTest {
         assertTrue(thrown.getMessage().contains(VARIABLES_ARE_NULL_CHECK_CLIENT_RESPONSES));
     }
 
-    private TicketRequest createTicketRequest(String passengerType) {
-        TicketRequest request = new TicketRequest();
-        request.setPassengerList(Collections.singletonList(createPassenger(passengerType)));
-        request.setDestination("SOMEWHERE");
-        return request;
+    private TicketRequest createTicketRequest(String passengerType, int luggageUnits) {
+        final Passenger passenger = createPassenger(passengerType, luggageUnits);
+        final List<Passenger> passengerList = Collections.singletonList(passenger);
+        return new TicketRequest(passengerList, "SOMEWHERE");
     }
 
-    private Passenger createPassenger(String passengerType) {
-        Passenger passenger = new Passenger();
-        passenger.setPassengerType(PassengerType.valueOf(passengerType));
-        passenger.setLuggageUnits(1);
-        return passenger;
+    private Passenger createPassenger(String passengerType, int luggageUnits) {
+        return new Passenger(PassengerType.valueOf(passengerType), luggageUnits);
     }
 }
